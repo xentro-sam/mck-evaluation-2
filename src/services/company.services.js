@@ -28,12 +28,9 @@ const saveCompanies = async (url) => {
                     score: companyScore,
                     sector: sector,
                 };
-                console.log('here*************', db)
-                const res = await db.Companies.create(companyToSave);
-                console.log('****', res);
+                await db.Companies.create(companyToSave);
             }
             catch (error) {
-                console.log(error.message)
                 return;
             }
         });
