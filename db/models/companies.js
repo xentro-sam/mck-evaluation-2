@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   Companies.init({
     name: DataTypes.STRING,
     ceo: DataTypes.STRING,
-    score: DataTypes.NUMBER,
+    score: DataTypes.DECIMAL,
     sector: DataTypes.STRING
   }, {
     sequelize,

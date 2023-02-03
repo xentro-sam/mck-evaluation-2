@@ -21,18 +21,19 @@ const saveCompanies = async (url) => {
             try {
                 const companyDataResponse = await axios.get(COMPANYURL + company.companyId);
                 const companyData = companyDataResponse.data;
-                if (companyDatahasOwnProperty('error')) return;
                 const companyToSave = {
-                    companyId: company.companyId,
-                    companyName: companyData.name,
-                    companyCeo: companyData.ceo,
-                    companyScore: companyScore,
-                    companySector: sector,
+                    id: company.companyId,
+                    name: companyData.name,
+                    ceo: companyData.ceo,
+                    score: companyScore,
+                    sector: sector,
                 };
-                console.log(companyToSave);
-                await db.Company.create(companyToSave);
+                console.log('here*************', db)
+                const res = await db.Companies.create(companyToSave);
+                console.log('****', res);
             }
             catch (error) {
+                console.log(error.message)
                 return;
             }
         });
