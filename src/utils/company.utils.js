@@ -84,10 +84,20 @@ const saveCompanies = async (sectorData, sector) => {
     });
 }
 
+const insertRanking = async (companies) => {
+    let ranking = 1;
+    companies.forEach((company) => {
+        company.dataValues.ranking = ranking;
+        ranking++;
+    });
+    return companies;
+}
+
 module.exports = {
     getCompanyObjects,
     getCompanyScore,
     getSectors,
     saveCompaniesFromSectors,
-    saveCompanies
+    saveCompanies,
+    insertRanking
 }
