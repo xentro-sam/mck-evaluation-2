@@ -86,4 +86,52 @@ describe('Company controllers', () => {
             expect(res.json).toHaveBeenCalledWith({ message: 'Error getting companies' });
         });
     });
+    describe('updateCompany', () => {
+        it('should update company', async () => {
+            const spy = jest.spyOn(companyControllers, 'updateCompany');
+            const spyServices = jest.spyOn(companyServices, 'updateCompany');
+            const req = {
+                params: {
+                    id: 'test',
+                },
+                body: {
+                    ceo: 'test',
+                },
+            };
+            const res = {
+                status: jest.fn(() => res),
+                json: jest.fn(),
+            };
+            spyServices.mockImplementation(() => {
+                return Promise.resolve();
+            });
+            await companyControllers.updateCompany(req, res);
+            expect(spy).toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalled();
+        });
+        it('should not update company', async () => {
+            const spy = jest.spyOn(companyControllers, 'updateCompany');
+            const spyServices = jest.spyOn(companyServices, 'updateCompany');
+            const req = {
+                params: {
+                    id: 'test',
+                },
+                body: {
+                    ceo: 'test',
+                },
+            };
+            const res = {
+                status: jest.fn(() => res),
+                json: jest.fn(),
+            };
+            spyServices.mockImplementation(() => {
+                return Promise.reject();
+            });
+            await companyControllers.updateCompany(req, res);
+            expect(spy).toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ message: 'Error updating company' });
+        });
+    });
 });
