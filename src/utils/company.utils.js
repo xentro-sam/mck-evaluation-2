@@ -1,19 +1,28 @@
 const axios = require('axios');
+const db = require('../../db/models');
 
 const COMPANYURL = 'http://54.167.46.10/company/';
+const SECTORURL = 'http://54.167.46.10/sector?name='
 
-const getCompanyObjects = (company) => {
-    const companyData = company.split('\n');
-    let companyObjects = companyData.map((company) => {
-        const companyInfo = company.split(',');
-        const companyObject = {
-            companyId: companyInfo[0],
-            companySector: companyInfo[1],
-        };
-        return companyObject;
-    });
-    companyObjects = companyObjects.slice(1);
-    return companyObjects;
+const getCompanyObjects = async (url) => {
+    try {
+        const response = await axios.get(url);
+        const companies = response.data;
+        const companiesData = companies.split('\n');
+        let companyObjects = companiesData.map((company) => {
+            const companyInfo = company.split(',');
+            const companyObject = {
+                companyId: companyInfo[0],
+                companySector: companyInfo[1],
+            };
+            return companyObject;
+        });
+        companyObjects = companyObjects.slice(1);
+        return companyObjects;
+    }
+    catch (error) {
+        return error;
+    }
 }
 
 const getCompanyScore = (performanceIndex) => {
@@ -33,8 +42,52 @@ const getCompanyScore = (performanceIndex) => {
     return companyScore;
 }
 
+const getSectors = async (companies) => {
+    let sectorSet = new Set();
+    companies.forEach((company) => {
+        sectorSet.add(company.companySector);
+    });
+    return Array.from(sectorSet);
+}
+
+const saveCompaniesFromSectors = async (sectorList) => {
+    await sectorList.forEach(async (sector) => {
+        try {
+            const response = await axios.get(SECTORURL + sector);
+            const sectorData = response.data;
+            await saveCompanies(sectorData, sector);
+        }
+        catch (error) {
+            return error;
+        }
+    });
+}
+
+const saveCompanies = async (sectorData, sector) => {
+    await sectorData.forEach(async (company) => {
+        const companyId = company.companyId;
+        try {
+            const companyDataResponse = await axios.get(COMPANYURL + companyId);
+            const companyData = companyDataResponse.data;
+            const companyScore = getCompanyScore(company.performanceIndex);
+            await db.Companies.create({
+                id: companyData.id,
+                name: companyData.name,
+                ceo: companyData.ceo,
+                score: companyScore,
+                sector: sector
+            });
+        }
+        catch (error) {
+            return;
+        }
+    });
+}
 
 module.exports = {
     getCompanyObjects,
     getCompanyScore,
+    getSectors,
+    saveCompaniesFromSectors,
+    saveCompanies
 }

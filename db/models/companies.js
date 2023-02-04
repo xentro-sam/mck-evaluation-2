@@ -14,9 +14,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Companies.init({
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+      allowNull: false
+    },
     name: DataTypes.STRING,
     ceo: DataTypes.STRING,
-    score: DataTypes.DECIMAL,
+    score: DataTypes.DOUBLE,
     sector: DataTypes.STRING
   }, {
     sequelize,
