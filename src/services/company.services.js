@@ -16,7 +16,19 @@ const getCompanies = async (sector) => {
     return companies;
 }
 
+const updateCompany = async (id, companyData) => {
+    let company = await db.Companies.findAll({ where: { id }});
+    if(!company) {
+        throw new Error('Company not found');
+    }
+    company = {...company, ...companyData};
+    await db.Companies.update(companyData, { where: { id }});
+    company = await db.Companies.findAll({ where: { id }});
+    return company;
+}
+
 module.exports = {
     saveCompanies,
-    getCompanies
+    getCompanies,
+    updateCompany
 };
