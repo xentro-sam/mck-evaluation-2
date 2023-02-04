@@ -202,4 +202,35 @@ describe('Company utils', () => {
             expect(spyDb).toHaveBeenCalled();
         });
     });
+    describe('insertRanking', () => {
+        it('should insert ranking', async () => {
+            const spy = jest.spyOn(companyUtils, 'insertRanking');
+            const data = [{
+                dataValues: {
+                    "id": "8888888888-888888-009900-999999999",
+                    "name": "Microsoft",
+                    "ceo": "Gary Hauck",
+                    "score": 52.75,
+                    "sector": "Automobile",
+                    "updatedAt": "2020-05-18T12:00:00.000Z",
+                    "createdAt": "2020-05-18T12:00:00.000Z"
+                }
+            }];
+            await companyUtils.insertRanking(data);
+            expect(spy).toHaveBeenCalled();
+            const mockResponse = await spy.mock.results[0].value;
+            expect(mockResponse).toEqual([{
+                dataValues: {
+                    "id": "8888888888-888888-009900-999999999",
+                    "name": "Microsoft",
+                    "ceo": "Gary Hauck",
+                    "score": 52.75,
+                    "sector": "Automobile",
+                    "updatedAt": "2020-05-18T12:00:00.000Z",
+                    "createdAt": "2020-05-18T12:00:00.000Z",
+                    "ranking": 1
+                }
+            }]);
+        });
+    });
 });
