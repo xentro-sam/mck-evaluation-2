@@ -33,16 +33,17 @@ const getSectors = async (companies) => {
 };
 
 const saveCompaniesFromSectors = async (sectorList) => {
-  await sectorList.forEach(async (sector) => {
+  const length = sectorList.length;
+  for (let i = 0; i < length; i++) {
     try {
-      const response = await axios.get(SECTORURL + sector);
+      const response = await axios.get(SECTORURL + sectorList[i]);
       const sectorData = response.data;
-      await dbUtils.saveCompanies(sectorData, sector);
+      await dbUtils.saveCompanies(sectorData, sectorList[i]);
     }
     catch (error) {
-      throw new Error(error);
+      throw new Error(error.message);
     }
-  });
+  }
 };
 
 const insertRanking = async (companies) => {

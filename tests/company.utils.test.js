@@ -3,6 +3,9 @@ const dbUtils = require('../src/utils/db.utils');
 const axios = require('axios');
 
 describe('Company utils', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   describe('getCompanyObjects', () => {
     it('should get company objects', async () => {
       //const spy = jest.spyOn(companyUtils, 'getCompanyObjects');
@@ -121,24 +124,25 @@ describe('Company utils', () => {
     });
   });
   describe('saveCompaniesFromSectors', () => {
-    xit('should not save companies from sectors', async () => {
+    it('should not save companies from sectors', async () => {
       const spyAxios = jest.spyOn(axios, 'get');
       const spySaveCompanies = jest.spyOn(dbUtils, 'saveCompanies');
       spyAxios.mockImplementation(() => {
-        return Promise.reject();
+        return Promise.reject(
+          new Error('Error while fetching data from url')
+        );
       });
       spySaveCompanies.mockImplementation(() => {
         return Promise.reject();
       });
-      await expect(async () => await companyUtils.saveCompaniesFromSectors(['Automobile', 'Software']))
-      .rejects.toThrow(Error);
+      await expect(async () => await companyUtils.saveCompaniesFromSectors(['Automobile', 'Software'])).rejects.toThrow(Error);
       expect(spyAxios).toHaveBeenCalled();
       expect(spySaveCompanies).not.toHaveBeenCalled();
     });
   });
   describe('insertRanking', () => {
-    xit('should insert ranking', async () => {
-      const spy = jest.spyOn(companyUtils, 'insertRanking');
+    it('should insert ranking', async () => {
+      //const spy = jest.spyOn(companyUtils, 'insertRanking');
       const data = [{
         dataValues: {
           'id': '8888888888-888888-009900-999999999',
@@ -150,10 +154,8 @@ describe('Company utils', () => {
           'createdAt': '2020-05-18T12:00:00.000Z'
         }
       }];
-      await companyUtils.insertRanking(data);
-      expect(spy).toHaveBeenCalled();
-      const mockResponse = await spy.mock.results[0].value;
-      expect(mockResponse).toEqual([{
+      const response = await companyUtils.insertRanking(data);
+      expect(response).toEqual([{
         dataValues: {
           'id': '8888888888-888888-009900-999999999',
           'name': 'Microsoft',
