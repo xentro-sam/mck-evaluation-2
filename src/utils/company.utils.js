@@ -1,7 +1,6 @@
 const axios = require('axios');
-const db = require('../../db/models');
+const dbUtils = require('./db.utils');
 
-const COMPANYURL = 'http://54.167.46.10/company/';
 const SECTORURL = 'http://54.167.46.10/sector?name=';
 
 const getCompanyObjects = async (url) => {
@@ -25,23 +24,6 @@ const getCompanyObjects = async (url) => {
   }
 };
 
-const getCompanyScore = (performanceIndex) => {
-  let companyScore = 0;
-  performanceIndex.forEach((index) => {
-    if(index.key === 'cpi' || index.key === 'mau') {
-      companyScore += index.value * 10;
-    }
-    else if(index.key === 'cf') {
-      companyScore += index.value / 10000;
-    }
-    else if(index.key === 'roic') {
-      companyScore += index.value;
-    }
-  });
-  companyScore /= 4;
-  return companyScore;
-};
-
 const getSectors = async (companies) => {
   let sectorSet = new Set();
   companies.forEach((company) => {
@@ -55,31 +37,10 @@ const saveCompaniesFromSectors = async (sectorList) => {
     try {
       const response = await axios.get(SECTORURL + sector);
       const sectorData = response.data;
-      await saveCompanies(sectorData, sector);
+      await dbUtils.saveCompanies(sectorData, sector);
     }
     catch (error) {
-      return error;
-    }
-  });
-};
-
-const saveCompanies = async (sectorData, sector) => {
-  await sectorData.forEach(async (company) => {
-    const companyId = company.companyId;
-    try {
-      const companyDataResponse = await axios.get(COMPANYURL + companyId);
-      const companyData = companyDataResponse.data;
-      const companyScore = getCompanyScore(company.performanceIndex);
-      await db.Companies.create({
-        id: companyData.id,
-        name: companyData.name,
-        ceo: companyData.ceo,
-        score: companyScore,
-        sector: sector
-      });
-    }
-    catch (error) {
-      return;
+      throw new Error(error);
     }
   });
 };
@@ -95,9 +56,7 @@ const insertRanking = async (companies) => {
 
 module.exports = {
   getCompanyObjects,
-  getCompanyScore,
   getSectors,
   saveCompaniesFromSectors,
-  saveCompanies,
   insertRanking
 };

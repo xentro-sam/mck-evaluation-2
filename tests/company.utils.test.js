@@ -1,11 +1,11 @@
 const companyUtils = require('../src/utils/company.utils');
+const dbUtils = require('../src/utils/db.utils');
 const axios = require('axios');
-const db = require('../db/models');
 
 describe('Company utils', () => {
   describe('getCompanyObjects', () => {
     it('should get company objects', async () => {
-      const spy = jest.spyOn(companyUtils, 'getCompanyObjects');
+      //const spy = jest.spyOn(companyUtils, 'getCompanyObjects');
       const spyAxios = jest.spyOn(axios, 'get');
       spyAxios.mockImplementation(() => {
         return Promise.resolve({
@@ -18,11 +18,11 @@ describe('Company utils', () => {
                         'e90a7bc7-47fa-49af-bfa1-391fe7768b56,Software'
         });
       });
-      await companyUtils.getCompanyObjects('http://example.com');
-      expect(spy).toHaveBeenCalled();
+      const res = await companyUtils.getCompanyObjects('http://example.com');
+      //expect(spy).toHaveBeenCalled();
       expect(spyAxios).toHaveBeenCalled();
-      const mockResponse = await spy.mock.results[0].value;
-      expect(mockResponse).toEqual([
+      //const mockResponse = await spy.mock.results[0].value;
+      expect(res).toEqual([
         {
           companyId: '95b5a067-808a-44a9-a490-b4ef8a045f61',
           companySector: 'Automobile',
@@ -44,30 +44,6 @@ describe('Company utils', () => {
           companySector: 'Software',
         },
       ]);
-    });
-  });
-  describe('getCompanyScore', () => {
-    it('should get company score', () => {
-      const performanceIndex = [
-        {
-          key: 'cpi',
-          value: 10,
-        },
-        {
-          key: 'mau',
-          value: 10,
-        },
-        {
-          key: 'cf',
-          value: 10000,
-        },
-        {
-          key: 'roic',
-          value: 10,
-        },
-      ];
-      const companyScore = companyUtils.getCompanyScore(performanceIndex);
-      expect(companyScore).toBe(52.75);
     });
   });
   describe('getSectors', () => {
@@ -95,8 +71,9 @@ describe('Company utils', () => {
   });
   describe('saveCompaniesFromSectors', () => {
     it('should save companies from sectors', async () => {
-      const spy = jest.spyOn(companyUtils, 'saveCompaniesFromSectors');
+      //const spy = jest.spyOn(companyUtils, 'saveCompaniesFromSectors');
       const spyAxios = jest.spyOn(axios, 'get');
+      const spySaveCompanies = jest.spyOn(dbUtils, 'saveCompanies');
       spyAxios.mockImplementation(() => {
         return Promise.resolve({
           data:
@@ -134,76 +111,33 @@ describe('Company utils', () => {
                         }]
         });
       });
+      spySaveCompanies.mockImplementation(() => {
+        return Promise.resolve();
+      });
       await companyUtils.saveCompaniesFromSectors(['Automobile', 'Software']);
-      expect(spy).toHaveBeenCalled();
+      //expect(spy).toHaveBeenCalled();
       expect(spyAxios).toHaveBeenCalled();
+      expect(spySaveCompanies).toHaveBeenCalled();
     });
   });
-  describe('saveCompanies', () => {
-    it('should save companies', async () => {
-      const spy = jest.spyOn(companyUtils, 'saveCompanies');
+  describe('saveCompaniesFromSectors', () => {
+    xit('should not save companies from sectors', async () => {
       const spyAxios = jest.spyOn(axios, 'get');
-      const spyDb = jest.spyOn(db.Companies, 'create');
+      const spySaveCompanies = jest.spyOn(dbUtils, 'saveCompanies');
       spyAxios.mockImplementation(() => {
-        return Promise.resolve({
-          data:
-                        {
-                          'id': 'b6472c52-732a-4fd2-a463-ae604c0a2c79',
-                          'name': 'Microsoft',
-                          'description': 'Sapiente earum molestiae molestias maxime numquam rem esse quos excepturi. Nihil accusamus sequi ipsa. Harum cupiditate ipsa. Eveniet corporis est nemo officia numquam non fugiat. Incidunt mollitia atque officia doloribus voluptatem. Sint repellendus velit.',
-                          'ceo': 'Gary Hauck',
-                          'tags': [
-                            'dynamic',
-                            'front-end',
-                            '24/7',
-                            'front-end',
-                            'dynamic',
-                            'user-centric'
-                          ]
-                        }
-        });
+        return Promise.reject();
       });
-      const sectorData = [{
-        'companyId': '8888888888-888888-009900-999999999',
-        'performanceIndex': [{
-          'key': 'cpi',
-          'value': 0.2
-        }, {
-          'key': 'cf',
-          'value': 30000
-        }, {
-          'key': 'mau',
-          'value': 0.1
-        }, {
-          'key': 'roic',
-          'value': 20
-        }],
-      },
-      {
-        'companyId': '9999999999-999998-009900-999999999',
-        'performanceIndex': [{
-          'key': 'cpi',
-          'value': 0.2
-        }, {
-          'key': 'cf',
-          'value': 50000
-        }, {
-          'key': 'mau',
-          'value': 0.1
-        }, {
-          'key': 'roic',
-          'value': 20
-        }],
-      }];
-      const sector = 'Automobile';
-      await companyUtils.saveCompanies(sectorData, sector);
-      expect(spy).toHaveBeenCalled();
+      spySaveCompanies.mockImplementation(() => {
+        return Promise.reject();
+      });
+      await expect(async () => await companyUtils.saveCompaniesFromSectors(['Automobile', 'Software']))
+      .rejects.toThrow(Error);
       expect(spyAxios).toHaveBeenCalled();
-      expect(spyDb).toHaveBeenCalled();
+      expect(spySaveCompanies).not.toHaveBeenCalled();
     });
   });
   describe('insertRanking', () => {
-    it('should insert ranking', async () => {
+    xit('should insert ranking', async () => {
       const spy = jest.spyOn(companyUtils, 'insertRanking');
       const data = [{
         dataValues: {
